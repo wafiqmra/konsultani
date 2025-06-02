@@ -29,6 +29,7 @@ trigram = Phrases(bigram[base_tokens], threshold=1)
 bigram_mod = Phraser(bigram)
 trigram_mod = Phraser(trigram)
 
+# Jika mau hilangkan manual_phrase_merge, bisa dihapus, tapi biarkan untuk saat ini
 def manual_phrase_merge(tokens):
     merged_tokens = []
     i = 0
@@ -62,27 +63,16 @@ def detect_phrases_and_preprocess(text):
     tokens_cleaned = [t for t in tokens_merged if t not in stopwords]
     return tokens_cleaned
 
-# Rule-based inference function
-def rule_based_inference(facts):
-    conclusions = {}
-
-    # Rule 1
-    if facts.get('pertumbuhan') == 'lambat' and facts.get('ukuran') == 'kerdil':
-        conclusions['penyebab'] = 'nutrisi_rendah'
-
-    # Rule 2
-    if conclusions.get('penyebab') == 'nutrisi_rendah' and facts.get('jenis_pupuk') == 'kandang':
-        conclusions['frekuensi_pemupukan'] = '3_bulan'
-
-    # Rule 3
-    if facts.get('pH_tanah') == 'asam':
-        conclusions['tambahkan'] = 'kapur_dolomit'
-
-    return conclusions
-
-# Fungsi ekstraksi fakta sederhana dari token hasil preprocessing
 def extract_facts(tokens):
     facts = {}
+
+    # Cek kata kunci untuk daun (termasuk variasi kuning dan menguning)
+    if 'menguning' in tokens or 'kuning' in tokens:
+        facts['daun'] = 'menguning'
+    if 'bercak' in tokens:
+        facts['daun'] = 'bercak'
+    if 'kecil' in tokens:
+        facts['daun'] = 'kecil'
 
     # Cek kata kunci untuk pertumbuhan
     if 'lambat' in tokens:
@@ -103,14 +93,68 @@ def extract_facts(tokens):
         facts['jenis_pupuk'] = 'organik'
 
     # Cek pH tanah
-    if 'asam' in tokens:
-        facts['pH_tanah'] = 'asam'
+    if 'asam' in tokens or 'rendah' in tokens:
+        facts['pH_tanah'] = 'rendah'
     elif 'basa' in tokens:
         facts['pH_tanah'] = 'basa'
 
+    # Cek media tanam
+    if 'gulma' in tokens:
+        facts['media_tanam'] = 'gulma'
+
+    # Cek penyebab (jika ada kata 'hama')
+    if 'hama' in tokens:
+        facts['penyebab'] = 'hama'
+
+    # Cek tanaman tidak sehat
+    if 'tidak_sehat' in tokens or ('tidak' in tokens and 'sehat' in tokens):
+        facts['tanaman'] = 'tidak_sehat'
+
     return facts
 
-# Chatbot interaktif
+def rule_based_inference(facts):
+    conclusions = {}
+
+    # Rule 1
+    if facts.get('pertumbuhan') == 'lambat' and facts.get('ukuran') == 'kerdil':
+        conclusions['penyebab'] = 'nutrisi_rendah'
+
+    # Rule 2
+    if conclusions.get('penyebab') == 'nutrisi_rendah' and facts.get('jenis_pupuk') == 'kandang':
+        conclusions['frekuensi_pemupukan'] = '3_bulan'
+
+    # Rule 3
+    if facts.get('pH_tanah') == 'rendah':
+        conclusions['tambahkan'] = 'kapur_dolomit'
+
+    # Rule baru (knowledge base yang kamu kasih)
+    # ● IF daun is menguning AND pertumbuhan is lambat THEN penyebab is nutrisi_rendah OR sinar_matahari_kurang OR gulma_ada
+    if facts.get('daun') == 'menguning' and facts.get('pertumbuhan') == 'lambat':
+        conclusions['penyebab'] = 'nutrisi_rendah / sinar_matahari_kurang / gulma_ada'
+
+    # ● IF media_tanam has gulma THEN lakukan is pembersihan
+    if facts.get('media_tanam') == 'gulma':
+        conclusions['lakukan'] = 'pembersihan'
+
+    # ● IF daun is bercak THEN penyebab is hama OR penyakit
+    if facts.get('daun') == 'bercak':
+        conclusions['penyebab'] = 'hama / penyakit'
+
+    # ● IF daun is kecil THEN nutrisi is kurang
+    if facts.get('daun') == 'kecil':
+        conclusions['nutrisi'] = 'kurang'
+
+    # ● IF penyebab is hama THEN tindakan is pestisida_alami
+    if facts.get('penyebab') == 'hama':
+        conclusions['tindakan'] = 'pestisida_alami'
+
+    # ● IF tanaman is tidak_sehat THEN lakukan is pemangkasan AND ganti_media_tanam is ya
+    if facts.get('tanaman') == 'tidak_sehat':
+        conclusions['lakukan'] = 'pemangkasan'
+        conclusions['ganti_media_tanam'] = 'ya'
+
+    return conclusions
+
 def chatbot():
     print("🌱 Chatbot Perkebunan Siap! (Ketik 'exit' untuk keluar)")
     while True:
@@ -133,12 +177,7 @@ def chatbot():
         if conclusions:
             print("🤖 Bot: Berikut hasil analisis dan rekomendasi:")
             for k, v in conclusions.items():
-                if k == 'penyebab':
-                    print(f"- Penyebab kemungkinan: {v.replace('_', ' ')}")
-                elif k == 'frekuensi_pemupukan':
-                    print(f"- Frekuensi pemupukan yang disarankan: {v.replace('_', ' ')}")
-                elif k == 'tambahkan':
-                    print(f"- Disarankan menambahkan: {v.replace('_', ' ')}")
+                print(f"- {k.replace('_', ' ').capitalize()}: {v.replace('_', ' ')}")
         else:
             print("🤖 Bot: Saya tidak menemukan masalah berdasarkan input kamu. Silakan coba info lain.")
 
