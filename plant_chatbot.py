@@ -41,9 +41,24 @@ def detect_phrases_and_preprocess(text):
     tokens = [t for t in tokens if t not in stopwords]
     return tokens
 
+# Fungsi tambahan untuk deteksi angka suhu
+def extract_temperature(tokens):
+    for t in tokens:
+        if t.isdigit():
+            temp = int(t)
+            if 20 <= temp <= 30:
+                return '20_30C'
+            # bisa tambahkan range suhu lain jika diperlukan
+    return None
+
 # Ekstraksi fakta dari token
 def extract_facts(tokens):
     facts = {}
+
+    # deteksi suhu dari angka
+    suhu_detected = extract_temperature(tokens)
+    if suhu_detected:
+        facts['suhu'] = suhu_detected
 
     # Kondisi pertumbuhan
     if 'lambat' in tokens:
@@ -196,8 +211,8 @@ def chatbot():
             for k, v in conclusions.items():
                 print(f"- {k.replace('_', ' ').capitalize()}: {v.replace('_', ' ')}")
         else:
-            print("🤖 Bot: Saya tidak menemukan solusi berdasarkan input kamu. Coba jelaskan dengan cara lain.")
+            print("🤖 Bot: Saya tidak menemukan solusi berdasarkan input tersebut.")
 
-# Jalankan program
+# Run chatbot
 if __name__ == "__main__":
     chatbot()
