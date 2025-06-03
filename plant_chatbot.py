@@ -174,93 +174,30 @@ def rule_based_inference(facts):
 
     return conclusions
 
-# Fungsi tambahan: penjelasan setiap kesimpulan
-def explain_conclusions(conclusions):
-    explanation_map = {
-        'penyebab': {
-            'nutrisi_rendah': "Tanaman kemungkinan kekurangan nutrisi yang diperlukan.",
-            'nutrisi_rendah / sinar_matahari_kurang / gulma_ada': "Pertumbuhan tanaman lambat bisa karena nutrisi kurang, kurang sinar matahari, atau adanya gulma.",
-            'hama / penyakit': "Daun bercak kemungkinan disebabkan oleh serangan hama atau penyakit."
-        },
-        'nutrisi': {
-            'kurang': "Nutrisi tanaman kurang sehingga menyebabkan daun kecil."
-        },
-        'tindakan': {
-            'pestisida_alami': "Disarankan menggunakan pestisida alami untuk mengendalikan hama."
-        },
-        'lakukan': {
-            'pemangkasan': "Lakukan pemangkasan untuk tanaman yang tidak sehat.",
-            'pembersihan': "Bersihkan gulma yang ada pada media tanam."
-        },
-        'ganti_media_tanam': {
-            'ya': "Disarankan mengganti media tanam untuk kesehatan tanaman."
-        },
-        'gunakan': {
-            'furadan': "Gunakan Furadan untuk mengatasi cacing pada akar.",
-            'predator_alami': "Gunakan predator alami untuk mengendalikan serangan hama yang berulang.",
-            'pengeringan / pendinginan': "Gunakan teknik pengeringan atau pendinginan untuk penyimpanan yang lama."
-        },
-        'tambahkan': {
-            'kapur_dolomit': "Tambahkan kapur dolomit untuk menetralkan pH tanah yang asam atau rendah.",
-            'garam_khusus': "Tambahkan garam khusus untuk metode budidaya hidroponik."
-        },
-        'frekuensi_pemupukan': {
-            '3_bulan': "Pemupukan dilakukan setiap 3 bulan untuk pupuk kandang."
-        },
-        'metode_budidaya': {
-            'pot_kulit_padat': "Metode budidaya menggunakan pot kulit padat cocok untuk lahan sempit dan perawatan mudah.",
-            'hidroponik': "Metode budidaya hidroponik memerlukan perawatan yang lebih tinggi dan hasil optimal."
-        },
-        'penyimpanan': {
-            'optimal': "Penyimpanan sudah optimal dengan suhu dan ventilasi yang sesuai."
-        },
-        'jumlah_hama': {
-            'banyak': "Curah hujan tinggi dapat meningkatkan jumlah hama."
-        },
-        'efektivitas_semprot': {
-            'tinggi': "Penyemprotan pada pagi dan sore saat tidak hujan memiliki efektivitas tinggi."
-        },
-        'penyiraman': {
-            'tidak_perlu': "Penyiraman tidak diperlukan jika hujan sudah cukup."
-        }
-    }
-
-    explanations = []
-    for key, value in conclusions.items():
-        if key in explanation_map and value in explanation_map[key]:
-            explanations.append(explanation_map[key][value])
-        else:
-            explanations.append(f"{key.replace('_', ' ').capitalize()}: {value.replace('_', ' ')}")
-    return explanations
-
-
 # Chatbot interaktif
 def chatbot():
     print("🌱 Chatbot Pertanian Siap Membantu! (Ketik 'exit' untuk keluar)\n")
     while True:
         user_input = input("👩‍🌾 Kamu: ")
         if user_input.lower() == 'exit':
-            print("Terima kasih sudah menggunakan chatbot. Sampai jumpa!")
+            print("👋 Sampai jumpa!")
             break
 
         tokens = detect_phrases_and_preprocess(user_input)
+        print("🔍 Token + Phrase:", tokens)
+
         facts = extract_facts(tokens)
+        print("📝 Fakta yang terdeteksi:", facts)
+
         conclusions = rule_based_inference(facts)
 
-        if not conclusions:
-            print("🤖 Bot: Maaf, saya belum bisa memberikan kesimpulan dari kalimat tersebut.\n")
-            continue
+        if conclusions:
+            print("🤖 Bot: Berikut hasil analisis dan rekomendasi:")
+            for k, v in conclusions.items():
+                print(f"- {k.replace('_', ' ').capitalize()}: {v.replace('_', ' ')}")
+        else:
+            print("🤖 Bot: Saya tidak menemukan solusi berdasarkan input kamu. Coba jelaskan dengan cara lain.")
 
-        print("🤖 Bot: Berdasarkan input kamu, berikut kesimpulan saya:")
-        for k, v in conclusions.items():
-            print(f" - {k.replace('_', ' ').capitalize()}: {v.replace('_', ' ')}")
-
-        # Tampilkan penjelasan
-        print("\nPenjelasan:")
-        explanations = explain_conclusions(conclusions)
-        for exp in explanations:
-            print(f" - {exp}")
-        print()
-
+# Jalankan program
 if __name__ == "__main__":
     chatbot()
