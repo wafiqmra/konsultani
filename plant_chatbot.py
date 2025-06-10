@@ -195,6 +195,10 @@ def extract_facts(tokens, original_text):
     if any(word in text_lower for word in ['pagi', 'sore', 'morning', 'evening']):
         facts['waktu'] = 'pagi_sore'
 
+    # Hapus fakta 'tanaman': 'sehat' jika itu satu-satunya fakta dan input tidak mengandung kata 'sehat', 'baik', atau 'normal'
+    if list(facts.keys()) == ['tanaman'] and facts['tanaman'] == 'sehat' and not any(word in text_lower for word in ['sehat', 'baik', 'normal']):
+        facts = {}
+        
     return facts
 
 # Inference rules yang lebih komprehensif

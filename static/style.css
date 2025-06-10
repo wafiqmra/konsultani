@@ -193,6 +193,16 @@ button:hover {
     color: white;
 }
 
+.nlp-token {
+    color: #1976d2; /* biru */
+    font-weight: 600;
+}
+
+.nlp-fakta {
+    color: #ff9800; /* oranye */
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .chat-container {
         margin: 1rem;

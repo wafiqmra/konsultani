@@ -20,6 +20,12 @@ def chat():
 
     response_parts = []
 
+    # Tampilkan hasil NLP dan prosesnya
+    response_parts.append('--- Hasil NLP & Proses ---')
+    response_parts.append(f"Token hasil NLP: <span class='nlp-token'>{tokens}</span>")
+    response_parts.append(f"Fakta yang diekstrak: <span class='nlp-fakta'>{facts}</span>")
+    response_parts.append('--------------------------')
+
     if 'kemungkinan_penyebab' in conclusions:
         response_parts.append(f"🔍 Kemungkinan penyebab: {conclusions['kemungkinan_penyebab'].replace('_', ' ')}")
 
